@@ -1427,31 +1427,46 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void setAudioOutput(String mode) {
-        Log.d(TAG, "setAudioOutput() called with mode: " + mode);
+        WritableMap params = Arguments.createMap();
+        params.putString("message", "setAudioOutput() called with mode: " + mode);
+        sendEvent("webrtc_log", params);
+
         ThreadUtils.runOnExecutor(() -> {
             try {
                 ReactApplicationContext reactContext = getReactApplicationContext();
                 android.media.AudioManager audioManager = 
                     (android.media.AudioManager) reactContext.getSystemService(Context.AUDIO_SERVICE);
                 
-                Log.d(TAG, "Current audio mode: " + audioManager.getMode());
-                Log.d(TAG, "Current speaker state: " + audioManager.isSpeakerphoneOn());
+                WritableMap currentState = Arguments.createMap();
+                currentState.putString("message", "Current audio mode: " + audioManager.getMode() + 
+                    ", Speaker state: " + audioManager.isSpeakerphoneOn());
+                sendEvent("webrtc_log", currentState);
                 
                 if ("speaker".equals(mode)) {
-                    Log.d(TAG, "Attempting to switch to speaker mode...");
+                    WritableMap switchingMode = Arguments.createMap();
+                    switchingMode.putString("message", "Switching to speaker mode...");
+                    sendEvent("webrtc_log", switchingMode);
+                    
                     audioManager.setMode(android.media.AudioManager.MODE_IN_COMMUNICATION);
                     audioManager.setSpeakerphoneOn(true);
                 } else if ("earpiece".equals(mode)) {
-                    Log.d(TAG, "Attempting to switch to earpiece mode...");
+                    WritableMap switchingMode = Arguments.createMap();
+                    switchingMode.putString("message", "Switching to earpiece mode...");
+                    sendEvent("webrtc_log", switchingMode);
+                    
                     audioManager.setMode(android.media.AudioManager.MODE_IN_COMMUNICATION);
                     audioManager.setSpeakerphoneOn(false);
                 }
                 
-                Log.d(TAG, "Audio switch completed. New speaker state: " + audioManager.isSpeakerphoneOn());
-                Log.d(TAG, "New audio mode: " + audioManager.getMode());
+                WritableMap newState = Arguments.createMap();
+                newState.putString("message", "Audio switch completed. New speaker state: " + 
+                    audioManager.isSpeakerphoneOn() + ", New audio mode: " + audioManager.getMode());
+                sendEvent("webrtc_log", newState);
+                
             } catch (Exception e) {
-                Log.e(TAG, "Error setting audio output: " + e.getMessage());
-                e.printStackTrace();
+                WritableMap error = Arguments.createMap();
+                error.putString("message", "Error setting audio output: " + e.getMessage());
+                sendEvent("webrtc_log", error);
             }
         });
     }
