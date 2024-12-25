@@ -1426,6 +1426,37 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void setAudioOutput(String mode) {
+        Log.d(TAG, "setAudioOutput() called with mode: " + mode);
+        ThreadUtils.runOnExecutor(() -> {
+            try {
+                ReactApplicationContext reactContext = getReactApplicationContext();
+                android.media.AudioManager audioManager = 
+                    (android.media.AudioManager) reactContext.getSystemService(Context.AUDIO_SERVICE);
+                
+                Log.d(TAG, "Current audio mode: " + audioManager.getMode());
+                Log.d(TAG, "Current speaker state: " + audioManager.isSpeakerphoneOn());
+                
+                if ("speaker".equals(mode)) {
+                    Log.d(TAG, "Attempting to switch to speaker mode...");
+                    audioManager.setMode(android.media.AudioManager.MODE_IN_COMMUNICATION);
+                    audioManager.setSpeakerphoneOn(true);
+                } else if ("earpiece".equals(mode)) {
+                    Log.d(TAG, "Attempting to switch to earpiece mode...");
+                    audioManager.setMode(android.media.AudioManager.MODE_IN_COMMUNICATION);
+                    audioManager.setSpeakerphoneOn(false);
+                }
+                
+                Log.d(TAG, "Audio switch completed. New speaker state: " + audioManager.isSpeakerphoneOn());
+                Log.d(TAG, "New audio mode: " + audioManager.getMode());
+            } catch (Exception e) {
+                Log.e(TAG, "Error setting audio output: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
+    }
+
+    @ReactMethod
     public void addListener(String eventName) {
         // Keep: Required for RN built in Event Emitter Calls.
     }
