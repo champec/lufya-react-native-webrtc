@@ -1426,52 +1426,6 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void setAudioOutput(String mode) {
-        WritableMap params = Arguments.createMap();
-        params.putString("message", "setAudioOutput() called with mode: " + mode);
-        sendEvent("webrtc_log", params);
-
-        ThreadUtils.runOnExecutor(() -> {
-            try {
-                ReactApplicationContext reactContext = getReactApplicationContext();
-                android.media.AudioManager audioManager = 
-                    (android.media.AudioManager) reactContext.getSystemService(Context.AUDIO_SERVICE);
-                
-                WritableMap currentState = Arguments.createMap();
-                currentState.putString("message", "Current audio mode: " + audioManager.getMode() + 
-                    ", Speaker state: " + audioManager.isSpeakerphoneOn());
-                sendEvent("webrtc_log", currentState);
-                
-                if ("speaker".equals(mode)) {
-                    WritableMap switchingMode = Arguments.createMap();
-                    switchingMode.putString("message", "Switching to speaker mode...");
-                    sendEvent("webrtc_log", switchingMode);
-                    
-                    audioManager.setMode(android.media.AudioManager.MODE_IN_COMMUNICATION);
-                    audioManager.setSpeakerphoneOn(true);
-                } else if ("earpiece".equals(mode)) {
-                    WritableMap switchingMode = Arguments.createMap();
-                    switchingMode.putString("message", "Switching to earpiece mode...");
-                    sendEvent("webrtc_log", switchingMode);
-                    
-                    audioManager.setMode(android.media.AudioManager.MODE_IN_COMMUNICATION);
-                    audioManager.setSpeakerphoneOn(false);
-                }
-                
-                WritableMap newState = Arguments.createMap();
-                newState.putString("message", "Audio switch completed. New speaker state: " + 
-                    audioManager.isSpeakerphoneOn() + ", New audio mode: " + audioManager.getMode());
-                sendEvent("webrtc_log", newState);
-                
-            } catch (Exception e) {
-                WritableMap error = Arguments.createMap();
-                error.putString("message", "Error setting audio output: " + e.getMessage());
-                sendEvent("webrtc_log", error);
-            }
-        });
-    }
-
-    @ReactMethod
     public void addListener(String eventName) {
         // Keep: Required for RN built in Event Emitter Calls.
     }
