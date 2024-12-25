@@ -89,21 +89,10 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
             }
         }
 
-        // if (adm == null) {
-        //     adm = JavaAudioDeviceModule.builder(reactContext).setEnableVolumeLogger(false).createAudioDeviceModule();
-        // }
-            if (adm == null) {
-        AudioAttributes audioAttributes = new AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_MEDIA)
-            .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-            .build();
-
-        adm = JavaAudioDeviceModule.builder(reactContext)
-            .setEnableVolumeLogger(false)
-            .setAudioAttributes(audioAttributes)
-            .createAudioDeviceModule();
-    }
-
+        if (adm == null) {
+            adm = JavaAudioDeviceModule.builder(reactContext).setEnableVolumeLogger(false).createAudioDeviceModule();
+        }
+         
         Log.d(TAG, "Using video encoder factory: " + encoderFactory.getClass().getCanonicalName());
         Log.d(TAG, "Using video decoder factory: " + decoderFactory.getClass().getCanonicalName());
 
