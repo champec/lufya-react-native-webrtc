@@ -40,7 +40,7 @@ import android.media.AudioManager;
 import android.content.Context;
 
 // Custom AudioDeviceModule
-import com.oney.WebRTCModule.webrtcutils.AlwaysSpeakerAudioDeviceModule;
+import com.oney.WebRTCModule.AlwaysSpeakerAudioDeviceModule;
 
 @ReactModule(name = "WebRTCModule")
 public class WebRTCModule extends ReactContextBaseJavaModule {
