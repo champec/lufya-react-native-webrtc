@@ -36,10 +36,6 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
-import android.media.AudioManager;
-import android.content.Context;
-
-
 @ReactModule(name = "WebRTCModule")
 public class WebRTCModule extends ReactContextBaseJavaModule {
     static final String TAG = WebRTCModule.class.getCanonicalName();
@@ -1402,18 +1398,6 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
             pco.dataChannelDispose(reactTag);
         });
     }
-
-   
-    @ReactMethod
-    public void setSpeakerPhone(boolean enable) {
-        AudioManager audioManager =
-            (AudioManager) getReactApplicationContext().getSystemService(Context.AUDIO_SERVICE);
-        // Set the call audio mode
-        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-        // Force or disable speakerphone
-        audioManager.setSpeakerphoneOn(enable);
-    }
-
 
     @ReactMethod
     public void dataChannelSend(int peerConnectionId, String reactTag, String data, String type) {
