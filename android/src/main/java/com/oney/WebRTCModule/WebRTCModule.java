@@ -92,17 +92,6 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
         if (adm == null) {
             adm = JavaAudioDeviceModule.builder(reactContext).setEnableVolumeLogger(false).createAudioDeviceModule();
         }
-    //         if (adm == null) {
-    //     AudioAttributes audioAttributes = new AudioAttributes.Builder()
-    //         .setUsage(AudioAttributes.USAGE_MEDIA)
-    //         .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-    //         .build();
-
-    //     adm = JavaAudioDeviceModule.builder(reactContext)
-    //         .setEnableVolumeLogger(false)
-    //         .setAudioAttributes(audioAttributes)
-    //         .createAudioDeviceModule();
-    // }
 
         Log.d(TAG, "Using video encoder factory: " + encoderFactory.getClass().getCanonicalName());
         Log.d(TAG, "Using video decoder factory: " + decoderFactory.getClass().getCanonicalName());
@@ -529,17 +518,6 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
             Log.d(TAG, "peerConnectionAddTransceiver() " + e.getMessage());
             return null;
         }
-    }
-
-           // ...
-    @ReactMethod
-    public void setSpeakerPhone(boolean enable) {
-        AudioManager audioManager =
-            (AudioManager) getReactApplicationContext().getSystemService(Context.AUDIO_SERVICE);
-        // Set the call audio mode
-        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-        // Force or disable speakerphone
-        audioManager.setSpeakerphoneOn(enable);
     }
 
     @ReactMethod(isBlockingSynchronousMethod = true)
