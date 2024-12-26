@@ -40,6 +40,8 @@ import java.util.concurrent.ExecutionException;
 import android.content.Context;
 import android.media.AudioAttributes;
 
+import com.oney.WebRTCModule.RNWebRTCAudioManager;
+
 @ReactModule(name = "WebRTCModule")
 public class WebRTCModule extends ReactContextBaseJavaModule {
     static final String TAG = WebRTCModule.class.getCanonicalName();
@@ -54,6 +56,7 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
     final Map<String, MediaStream> localStreams;
 
     private final GetUserMediaImpl getUserMediaImpl;
+    private RNWebRTCAudioManager audioManagerHelper;
 
     public WebRTCModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -126,6 +129,7 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
         mAudioDeviceModule = adm;
 
         getUserMediaImpl = new GetUserMediaImpl(this, reactContext);
+        audioManagerHelper = new RNWebRTCAudioManager(reactContext);
     }
 
     @NonNull
@@ -1427,6 +1431,21 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
 
             pco.dataChannelSend(reactTag, data, type);
         });
+    }
+
+    @ReactMethod
+    public void startAudioManager() {
+        audioManagerHelper.start();
+    }
+
+    @ReactMethod
+    public void stopAudioManager() {
+        audioManagerHelper.stop();
+    }
+
+    @ReactMethod
+    public void setSpeakerWanted(boolean enable) {
+        audioManagerHelper.setSpeakerWanted(enable);
     }
 
     @ReactMethod
