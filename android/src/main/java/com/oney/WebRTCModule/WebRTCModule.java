@@ -41,6 +41,35 @@ import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 
+public class AlwaysSpeakerAudioDeviceModule {
+    private final AudioDeviceModule adm;
+    private final AudioManager audioManager;
+
+    public AlwaysSpeakerAudioDeviceModule(Context context) {
+        audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+
+        // Build a JavaAudioDeviceModule but intercept route changes.
+        adm = JavaAudioDeviceModule.builder(context)
+            .setAudioDeviceEventsListener(new JavaAudioDeviceModule.AudioDeviceEventsListener() {
+                @Override
+                public void onAudioDeviceChanged(
+                    JavaAudioDeviceModule.AudioDevice audioDevice, 
+                    Set<JavaAudioDeviceModule.AudioDevice> availableDevices) {
+                  
+                    // Force speaker on, whenever device changes.
+                    audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+                    audioManager.setSpeakerphoneOn(true);
+                }
+            })
+            .createAudioDeviceModule();
+    }
+
+    public AudioDeviceModule getAudioDeviceModule() {
+        return adm;
+    }
+}
+
+
 @ReactModule(name = "WebRTCModule")
 public class WebRTCModule extends ReactContextBaseJavaModule {
     static final String TAG = WebRTCModule.class.getCanonicalName();
@@ -95,34 +124,9 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
         }
 
         if (adm == null) {
-    AudioAttributes audioAttributes = new AudioAttributes.Builder()
-        .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
-        .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-        .build();
-
-    // Create a custom audio device module that forces speaker mode
-    adm = JavaAudioDeviceModule.builder(reactContext)
-        .setEnableVolumeLogger(false)
-        .setUseHardwareAcousticEchoCanceler(true)
-        .setUseStereoOutput(false)
-        .setAudioAttributes(audioAttributes)
-        // Force speaker output by implementing our own AudioDeviceModule
-        .setAudioTrackStateCallback(new JavaAudioDeviceModule.AudioTrackStateCallback() {
-            @Override
-            public void onWebRtcAudioTrackStart() {
-                android.media.AudioManager audioManager = 
-                    (android.media.AudioManager) reactContext.getSystemService(Context.AUDIO_SERVICE);
-                audioManager.setMode(android.media.AudioManager.MODE_IN_COMMUNICATION);
-                audioManager.setSpeakerphoneOn(true);
-            }
-
-            @Override
-            public void onWebRtcAudioTrackStop() {
-                // Keep speaker settings even when track stops
-            }
-        })
-        .createAudioDeviceModule();
-}
+            // adm = JavaAudioDeviceModule.builder(reactContext).setEnableVolumeLogger(false).createAudioDeviceModule();
+            adm = new AlwaysSpeakerAudioDeviceModule(reactContext);
+        }
         //         if (adm == null) {
         //     AudioAttributes audioAttributes = new AudioAttributes.Builder()
         //         .setUsage(AudioAttributes.USAGE_MEDIA)
@@ -151,6 +155,35 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
 //     android.media.AudioManager audioManager = 
 //         (android.media.AudioManager) reactContext.getSystemService(Context.AUDIO_SERVICE);
 //     audioManager.setSpeakerphoneOn(true);
+// }
+// if (adm == null) {
+//     AudioAttributes audioAttributes = new AudioAttributes.Builder()
+//         .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+//         .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+//         .build();
+
+//     // Create a custom audio device module that forces speaker mode
+//     adm = JavaAudioDeviceModule.builder(reactContext)
+//         .setEnableVolumeLogger(false)
+//         .setUseHardwareAcousticEchoCanceler(true)
+//         .setUseStereoOutput(false)
+//         .setAudioAttributes(audioAttributes)
+//         // Force speaker output by implementing our own AudioDeviceModule
+//         .setAudioTrackStateCallback(new JavaAudioDeviceModule.AudioTrackStateCallback() {
+//             @Override
+//             public void onWebRtcAudioTrackStart() {
+//                 android.media.AudioManager audioManager = 
+//                     (android.media.AudioManager) reactContext.getSystemService(Context.AUDIO_SERVICE);
+//                 audioManager.setMode(android.media.AudioManager.MODE_IN_COMMUNICATION);
+//                 audioManager.setSpeakerphoneOn(true);
+//             }
+
+//             @Override
+//             public void onWebRtcAudioTrackStop() {
+//                 // Keep speaker settings even when track stops
+//             }
+//         })
+//         .createAudioDeviceModule();
 // }
 
         Log.d(TAG, "Using video encoder factory: " + encoderFactory.getClass().getCanonicalName());
