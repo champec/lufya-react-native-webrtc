@@ -39,9 +39,6 @@ import java.util.concurrent.ExecutionException;
 import android.media.AudioManager;
 import android.content.Context;
 
-// Custom AudioDeviceModule
-import com.oney.WebRTCModule.AlwaysSpeakerAudioDeviceModule;
-
 @ReactModule(name = "WebRTCModule")
 public class WebRTCModule extends ReactContextBaseJavaModule {
     static final String TAG = WebRTCModule.class.getCanonicalName();
@@ -96,7 +93,28 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
         }
 
         if (adm == null) {
-            adm = new AlwaysSpeakerAudioDeviceModule(reactContext);
+            AudioManager audioManager = (AudioManager) getReactApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+            adm = JavaAudioDeviceModule.builder(reactContext)
+                .setUseHardwareAcousticEchoCanceler(true)
+                .setUseHardwareNoiseSuppressor(true)
+                .setAudioDeviceEventsListener(new JavaAudioDeviceModule.AudioDeviceEventsListener() {
+                    @Override
+                    public void onAudioDeviceChanged(
+                            JavaAudioDeviceModule.AudioDevice device,
+                            Set<JavaAudioDeviceModule.AudioDevice> availableDevices
+                    ) {
+                        // Force speaker mode whenever a device change is attempted
+                        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+                        audioManager.setSpeakerphoneOn(true);
+                    }
+
+                    @Override
+                    public void onWebRtcAudioRecordStart() {}
+
+                    @Override
+                    public void onWebRtcAudioRecordStop() {}
+                })
+                .createAudioDeviceModule();
         }
 
         Log.d(TAG, "Using video encoder factory: " + encoderFactory.getClass().getCanonicalName());
