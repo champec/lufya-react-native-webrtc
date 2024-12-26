@@ -1431,6 +1431,7 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
         // Set the call audio mode
         audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
         // Force or disable speakerphone
+        
         audioManager.setSpeakerphoneOn(enable);
     }
 
