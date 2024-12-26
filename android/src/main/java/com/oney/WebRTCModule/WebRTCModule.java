@@ -39,6 +39,8 @@ import java.util.concurrent.ExecutionException;
 import android.media.AudioManager;
 import android.content.Context;
 
+// Custom AudioDeviceModule
+import com.oney.WebRTCModule.webrtcutils.AlwaysSpeakerAudioDeviceModule;
 
 @ReactModule(name = "WebRTCModule")
 public class WebRTCModule extends ReactContextBaseJavaModule {
@@ -94,7 +96,7 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
         }
 
         if (adm == null) {
-            adm = JavaAudioDeviceModule.builder(reactContext).setEnableVolumeLogger(false).createAudioDeviceModule();
+            adm = new AlwaysSpeakerAudioDeviceModule(reactContext);
         }
 
         Log.d(TAG, "Using video encoder factory: " + encoderFactory.getClass().getCanonicalName());
@@ -1114,7 +1116,7 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
                 SessionDescription sdp = new SessionDescription(
                         SessionDescription.Type.fromCanonicalForm(Objects.requireNonNull(desc.getString("type"))),
                         desc.getString("sdp"));
-
+            
                 peerConnection.setLocalDescription(observer, sdp);
             } else {
                 peerConnection.setLocalDescription(observer);
