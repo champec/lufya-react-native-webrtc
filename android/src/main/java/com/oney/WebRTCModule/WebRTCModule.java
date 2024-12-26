@@ -36,6 +36,10 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
+//import context and audio device module
+import android.content.Context;
+import android.media.AudioAttributes;
+
 @ReactModule(name = "WebRTCModule")
 public class WebRTCModule extends ReactContextBaseJavaModule {
     static final String TAG = WebRTCModule.class.getCanonicalName();
@@ -89,8 +93,19 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
             }
         }
 
-        if (adm == null) {
-            adm = JavaAudioDeviceModule.builder(reactContext).setEnableVolumeLogger(false).createAudioDeviceModule();
+        // if (adm == null) {
+        //     adm = JavaAudioDeviceModule.builder(reactContext).setEnableVolumeLogger(false).createAudioDeviceModule();
+        // }
+                if (adm == null) {
+            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                .build();
+
+            adm = JavaAudioDeviceModule.builder(reactContext)
+                .setEnableVolumeLogger(false)
+                .setAudioAttributes(audioAttributes)
+                .createAudioDeviceModule();
         }
 
         Log.d(TAG, "Using video encoder factory: " + encoderFactory.getClass().getCanonicalName());
