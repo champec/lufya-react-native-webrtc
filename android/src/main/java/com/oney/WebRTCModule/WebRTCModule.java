@@ -39,6 +39,7 @@ import java.util.concurrent.ExecutionException;
 //import context and audio device module
 import android.content.Context;
 import android.media.AudioAttributes;
+import android.media.AudioManager;
 
 @ReactModule(name = "WebRTCModule")
 public class WebRTCModule extends ReactContextBaseJavaModule {
@@ -96,17 +97,35 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
         // if (adm == null) {
         //     adm = JavaAudioDeviceModule.builder(reactContext).setEnableVolumeLogger(false).createAudioDeviceModule();
         // }
-                if (adm == null) {
-            AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_MEDIA)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-                .build();
+        //         if (adm == null) {
+        //     AudioAttributes audioAttributes = new AudioAttributes.Builder()
+        //         .setUsage(AudioAttributes.USAGE_MEDIA)
+        //         .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+        //         .build();
 
-            adm = JavaAudioDeviceModule.builder(reactContext)
-                .setEnableVolumeLogger(false)
-                .setAudioAttributes(audioAttributes)
-                .createAudioDeviceModule();
-        }
+        //     adm = JavaAudioDeviceModule.builder(reactContext)
+        //         .setEnableVolumeLogger(false)
+        //         .setAudioAttributes(audioAttributes)
+        //         .createAudioDeviceModule();
+        // }
+        if (adm == null) {
+    AudioAttributes audioAttributes = new AudioAttributes.Builder()
+        .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)  // Changed from USAGE_MEDIA
+        .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+        .build();
+
+    adm = JavaAudioDeviceModule.builder(reactContext)
+        .setEnableVolumeLogger(false)
+        .setUseHardwareAcousticEchoCanceler(true)  // Enable echo cancellation
+        .setUseStereoOutput(false)  // Mono output for clearer voice
+        .setAudioAttributes(audioAttributes)
+        .createAudioDeviceModule();
+
+    // Set speaker mode on by default
+    android.media.AudioManager audioManager = 
+        (android.media.AudioManager) reactContext.getSystemService(Context.AUDIO_SERVICE);
+    audioManager.setSpeakerphoneOn(true);
+}
 
         Log.d(TAG, "Using video encoder factory: " + encoderFactory.getClass().getCanonicalName());
         Log.d(TAG, "Using video decoder factory: " + decoderFactory.getClass().getCanonicalName());
