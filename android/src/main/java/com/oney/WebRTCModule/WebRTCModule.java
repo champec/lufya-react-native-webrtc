@@ -39,6 +39,7 @@ import java.util.concurrent.ExecutionException;
 import android.media.AudioManager;
 import android.content.Context;
 
+
 @ReactModule(name = "WebRTCModule")
 public class WebRTCModule extends ReactContextBaseJavaModule {
     static final String TAG = WebRTCModule.class.getCanonicalName();
@@ -93,28 +94,7 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
         }
 
         if (adm == null) {
-            AudioManager audioManager = (AudioManager) getReactApplicationContext().getSystemService(Context.AUDIO_SERVICE);
-            adm = JavaAudioDeviceModule.builder(reactContext)
-                .setUseHardwareAcousticEchoCanceler(true)
-                .setUseHardwareNoiseSuppressor(true)
-                .setAudioDeviceEventsListener(new JavaAudioDeviceModule.AudioDeviceEventsListener() {
-                    @Override
-                    public void onAudioDeviceChanged(
-                            JavaAudioDeviceModule.AudioDevice device,
-                            Set<JavaAudioDeviceModule.AudioDevice> availableDevices
-                    ) {
-                        // Force speaker mode whenever a device change is attempted
-                        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-                        audioManager.setSpeakerphoneOn(true);
-                    }
-
-                    @Override
-                    public void onWebRtcAudioRecordStart() {}
-
-                    @Override
-                    public void onWebRtcAudioRecordStop() {}
-                })
-                .createAudioDeviceModule();
+            adm = JavaAudioDeviceModule.builder(reactContext).setEnableVolumeLogger(false).createAudioDeviceModule();
         }
 
         Log.d(TAG, "Using video encoder factory: " + encoderFactory.getClass().getCanonicalName());
@@ -1134,7 +1114,7 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
                 SessionDescription sdp = new SessionDescription(
                         SessionDescription.Type.fromCanonicalForm(Objects.requireNonNull(desc.getString("type"))),
                         desc.getString("sdp"));
-            
+
                 peerConnection.setLocalDescription(observer, sdp);
             } else {
                 peerConnection.setLocalDescription(observer);
@@ -1431,7 +1411,6 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
         // Set the call audio mode
         audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
         // Force or disable speakerphone
-        
         audioManager.setSpeakerphoneOn(enable);
     }
 
