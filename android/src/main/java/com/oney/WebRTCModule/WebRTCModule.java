@@ -94,9 +94,35 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
             }
         }
 
-        // if (adm == null) {
-        //     adm = JavaAudioDeviceModule.builder(reactContext).setEnableVolumeLogger(false).createAudioDeviceModule();
-        // }
+        if (adm == null) {
+    AudioAttributes audioAttributes = new AudioAttributes.Builder()
+        .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+        .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+        .build();
+
+    // Create a custom audio device module that forces speaker mode
+    adm = JavaAudioDeviceModule.builder(reactContext)
+        .setEnableVolumeLogger(false)
+        .setUseHardwareAcousticEchoCanceler(true)
+        .setUseStereoOutput(false)
+        .setAudioAttributes(audioAttributes)
+        // Force speaker output by implementing our own AudioDeviceModule
+        .setAudioTrackStateCallback(new JavaAudioDeviceModule.AudioTrackStateCallback() {
+            @Override
+            public void onWebRtcAudioTrackStart() {
+                android.media.AudioManager audioManager = 
+                    (android.media.AudioManager) reactContext.getSystemService(Context.AUDIO_SERVICE);
+                audioManager.setMode(android.media.AudioManager.MODE_IN_COMMUNICATION);
+                audioManager.setSpeakerphoneOn(true);
+            }
+
+            @Override
+            public void onWebRtcAudioTrackStop() {
+                // Keep speaker settings even when track stops
+            }
+        })
+        .createAudioDeviceModule();
+}
         //         if (adm == null) {
         //     AudioAttributes audioAttributes = new AudioAttributes.Builder()
         //         .setUsage(AudioAttributes.USAGE_MEDIA)
@@ -108,24 +134,24 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
         //         .setAudioAttributes(audioAttributes)
         //         .createAudioDeviceModule();
         // }
-        if (adm == null) {
-    AudioAttributes audioAttributes = new AudioAttributes.Builder()
-        .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)  // Changed from USAGE_MEDIA
-        .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-        .build();
+//         if (adm == null) {
+//     AudioAttributes audioAttributes = new AudioAttributes.Builder()
+//         .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)  // Changed from USAGE_MEDIA
+//         .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+//         .build();
 
-    adm = JavaAudioDeviceModule.builder(reactContext)
-        .setEnableVolumeLogger(false)
-        .setUseHardwareAcousticEchoCanceler(true)  // Enable echo cancellation
-        .setUseStereoOutput(false)  // Mono output for clearer voice
-        .setAudioAttributes(audioAttributes)
-        .createAudioDeviceModule();
+//     adm = JavaAudioDeviceModule.builder(reactContext)
+//         .setEnableVolumeLogger(false)
+//         .setUseHardwareAcousticEchoCanceler(true)  // Enable echo cancellation
+//         .setUseStereoOutput(false)  // Mono output for clearer voice
+//         .setAudioAttributes(audioAttributes)
+//         .createAudioDeviceModule();
 
-    // Set speaker mode on by default
-    android.media.AudioManager audioManager = 
-        (android.media.AudioManager) reactContext.getSystemService(Context.AUDIO_SERVICE);
-    audioManager.setSpeakerphoneOn(true);
-}
+//     // Set speaker mode on by default
+//     android.media.AudioManager audioManager = 
+//         (android.media.AudioManager) reactContext.getSystemService(Context.AUDIO_SERVICE);
+//     audioManager.setSpeakerphoneOn(true);
+// }
 
         Log.d(TAG, "Using video encoder factory: " + encoderFactory.getClass().getCanonicalName());
         Log.d(TAG, "Using video decoder factory: " + decoderFactory.getClass().getCanonicalName());
