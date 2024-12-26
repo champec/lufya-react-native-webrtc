@@ -531,6 +531,17 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
         }
     }
 
+           // ...
+    @ReactMethod
+    public void setSpeakerPhone(boolean enable) {
+        AudioManager audioManager =
+            (AudioManager) getReactApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+        // Set the call audio mode
+        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+        // Force or disable speakerphone
+        audioManager.setSpeakerphoneOn(enable);
+    }
+
     @ReactMethod(isBlockingSynchronousMethod = true)
     public WritableMap peerConnectionAddTrack(int id, String trackId, ReadableMap options) {
         try {
