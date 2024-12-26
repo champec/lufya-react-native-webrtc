@@ -40,6 +40,8 @@ import java.util.concurrent.ExecutionException;
 import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
+import java.util.Set;
+
 
 public class AlwaysSpeakerAudioDeviceModule {
     private final AudioDeviceModule adm;
@@ -57,6 +59,7 @@ public class AlwaysSpeakerAudioDeviceModule {
                     Set<JavaAudioDeviceModule.AudioDevice> availableDevices) {
                   
                     // Force speaker on, whenever device changes.
+                    Log.d("AlwaysSpeakerAudioDevice", "Audio device changed to: " + audioDevice);
                     audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
                     audioManager.setSpeakerphoneOn(true);
                 }
@@ -125,7 +128,8 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
 
         if (adm == null) {
             // adm = JavaAudioDeviceModule.builder(reactContext).setEnableVolumeLogger(false).createAudioDeviceModule();
-            adm = new AlwaysSpeakerAudioDeviceModule(reactContext);
+            AlwaysSpeakerAudioDeviceModule alwaysSpeaker = new AlwaysSpeakerAudioDeviceModule(reactContext);
+            adm = alwaysSpeaker.getAudioDeviceModule(); // Grab the actual ADM
         }
         //         if (adm == null) {
         //     AudioAttributes audioAttributes = new AudioAttributes.Builder()
