@@ -114,6 +114,9 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
         Log.d(TAG, "Using video encoder factory: " + encoderFactory.getClass().getCanonicalName());
         Log.d(TAG, "Using video decoder factory: " + decoderFactory.getClass().getCanonicalName());
 
+        // setSpeakerMute(false)
+        ((JavaAudioDeviceModule)adm).setSpeakerMute(false);
+
         mFactory = PeerConnectionFactory.builder()
                            .setAudioDeviceModule(adm)
                            .setVideoEncoderFactory(encoderFactory)
