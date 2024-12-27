@@ -108,37 +108,41 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
                       ", Content: " + audioAttributes.getContentType());
 
             adm = JavaAudioDeviceModule.builder(reactContext)
-                .setEnableVolumeLogger(true)
+                .setEnableVolumeLogger(false)
                 .setAudioAttributes(audioAttributes)
                 .createAudioDeviceModule();
-                }
+        }
 
-            Log.d(TAG, "Attempting to set speaker unmute before factory creation");
-            try {
-                ((JavaAudioDeviceModule)adm).setSpeakerMute(false);
-                Log.d(TAG, "Successfully set speaker unmute");
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to set speaker unmute: " + e.getMessage());
-            }
+        Log.d(TAG, "Using video encoder factory: " + encoderFactory.getClass().getCanonicalName());
+        Log.d(TAG, "Using video decoder factory: " + decoderFactory.getClass().getCanonicalName());
 
-            Log.d(TAG, "Creating PeerConnectionFactory with ADM");
-            mFactory = PeerConnectionFactory.builder()
+        Log.d(TAG, "Attempting to set speaker unmute before factory creation");
+        try {
+            ((JavaAudioDeviceModule)adm).setSpeakerMute(false);
+            Log.d(TAG, "Successfully set speaker unmute");
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to set speaker unmute: " + e.getMessage());
+        }
+
+        Log.d(TAG, "Creating PeerConnectionFactory with ADM");
+        mFactory = PeerConnectionFactory.builder()
                            .setAudioDeviceModule(adm)
                            .setVideoEncoderFactory(encoderFactory)
                            .setVideoDecoderFactory(decoderFactory)
                            .createPeerConnectionFactory();
 
-            Log.d(TAG, "PeerConnectionFactory created, releasing ADM");
-            adm.release();
+        Log.d(TAG, "PeerConnectionFactory created, releasing ADM");
+        // PeerConnectionFactory now owns the adm native pointer, and we don't need it anymore.
+        adm.release();
 
-            // Saving the encoder and decoder factories to get codec info later when needed.
-            mVideoEncoderFactory = encoderFactory;
-            mVideoDecoderFactory = decoderFactory;
-            mAudioDeviceModule = adm;
+        // Saving the encoder and decoder factories to get codec info later when needed.
+        mVideoEncoderFactory = encoderFactory;
+        mVideoDecoderFactory = decoderFactory;
+        mAudioDeviceModule = adm;
 
-            getUserMediaImpl = new GetUserMediaImpl(this, reactContext);
-            audioManagerHelper = new RNWebRTCAudioManager(reactContext);
-        }
+        getUserMediaImpl = new GetUserMediaImpl(this, reactContext);
+        audioManagerHelper = new RNWebRTCAudioManager(reactContext);
+    }
 
     @NonNull
     @Override

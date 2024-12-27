@@ -25,11 +25,11 @@ public class RNWebRTCAudioManager {
         Log.d(TAG, "RNWebRTCAudioManager: Starting audio management");
         Log.d(TAG, "Current audio mode: " + audioManager.getMode());
         Log.d(TAG, "Current speaker state: " + audioManager.isSpeakerphoneOn());
-        
+
         // Set mode for two-way communication
         audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
         Log.d(TAG, "Set audio mode to: " + audioManager.getMode());
-        
+
         // Request audio focus
         audioManager.requestAudioFocus(
             focusChange -> {
@@ -48,7 +48,7 @@ public class RNWebRTCAudioManager {
     public void stop() {
         Log.d(TAG, "RNWebRTCAudioManager: Stopping audio management");
         Log.d(TAG, "Current audio mode before stop: " + audioManager.getMode());
-        
+
         // Revert to normal mode
         audioManager.setMode(AudioManager.MODE_NORMAL);
         audioManager.abandonAudioFocus(null);
@@ -59,7 +59,7 @@ public class RNWebRTCAudioManager {
         } catch (IllegalArgumentException e) {
             Log.d(TAG, "Headset receiver not registered");
         }
-        
+
         Log.d(TAG, "Audio management stopped");
     }
 
