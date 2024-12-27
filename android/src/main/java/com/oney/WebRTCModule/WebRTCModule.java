@@ -104,36 +104,41 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
                 .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
                 .build();
+            Log.d(TAG, "Creating JavaAudioDeviceModule with attributes - Usage: " + audioAttributes.getUsage() + 
+                      ", Content: " + audioAttributes.getContentType());
 
             adm = JavaAudioDeviceModule.builder(reactContext)
-                .setEnableVolumeLogger(false)
+                .setEnableVolumeLogger(true)
                 .setAudioAttributes(audioAttributes)
                 .createAudioDeviceModule();
-        }
+                }
 
-        Log.d(TAG, "Using video encoder factory: " + encoderFactory.getClass().getCanonicalName());
-        Log.d(TAG, "Using video decoder factory: " + decoderFactory.getClass().getCanonicalName());
+            Log.d(TAG, "Attempting to set speaker unmute before factory creation");
+            try {
+                ((JavaAudioDeviceModule)adm).setSpeakerMute(false);
+                Log.d(TAG, "Successfully set speaker unmute");
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to set speaker unmute: " + e.getMessage());
+            }
 
-        // setSpeakerMute(false)
-        ((JavaAudioDeviceModule)adm).setSpeakerMute(false);
-
-        mFactory = PeerConnectionFactory.builder()
+            Log.d(TAG, "Creating PeerConnectionFactory with ADM");
+            mFactory = PeerConnectionFactory.builder()
                            .setAudioDeviceModule(adm)
                            .setVideoEncoderFactory(encoderFactory)
                            .setVideoDecoderFactory(decoderFactory)
                            .createPeerConnectionFactory();
 
-        // PeerConnectionFactory now owns the adm native pointer, and we don't need it anymore.
-        adm.release();
+            Log.d(TAG, "PeerConnectionFactory created, releasing ADM");
+            adm.release();
 
-        // Saving the encoder and decoder factories to get codec info later when needed.
-        mVideoEncoderFactory = encoderFactory;
-        mVideoDecoderFactory = decoderFactory;
-        mAudioDeviceModule = adm;
+            // Saving the encoder and decoder factories to get codec info later when needed.
+            mVideoEncoderFactory = encoderFactory;
+            mVideoDecoderFactory = decoderFactory;
+            mAudioDeviceModule = adm;
 
-        getUserMediaImpl = new GetUserMediaImpl(this, reactContext);
-        audioManagerHelper = new RNWebRTCAudioManager(reactContext);
-    }
+            getUserMediaImpl = new GetUserMediaImpl(this, reactContext);
+            audioManagerHelper = new RNWebRTCAudioManager(reactContext);
+        }
 
     @NonNull
     @Override
@@ -1438,17 +1443,35 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void startAudioManager() {
+        Log.d(TAG, "Starting RNWebRTCAudioManager");
         audioManagerHelper.start();
+        logAudioState();
     }
 
     @ReactMethod
     public void stopAudioManager() {
+        Log.d(TAG, "Stopping RNWebRTCAudioManager");
         audioManagerHelper.stop();
+        logAudioState();
     }
 
     @ReactMethod
     public void setSpeakerWanted(boolean enable) {
+        Log.d(TAG, "Setting speaker wanted: " + enable);
         audioManagerHelper.setSpeakerWanted(enable);
+        logAudioState();
+    }
+
+    @ReactMethod
+    public void logAudioState() {
+        AudioManager am = (AudioManager) getReactApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+        Log.d(TAG, "=== Audio State ===");
+        Log.d(TAG, "Speaker on: " + am.isSpeakerphoneOn());
+        Log.d(TAG, "Audio mode: " + am.getMode());
+        Log.d(TAG, "Music active: " + am.isMusicActive());
+        Log.d(TAG, "SCO on: " + am.isBluetoothScoOn());
+        Log.d(TAG, "A2DP on: " + am.isBluetoothA2dpOn());
+        Log.d(TAG, "=================");
     }
 
     @ReactMethod
