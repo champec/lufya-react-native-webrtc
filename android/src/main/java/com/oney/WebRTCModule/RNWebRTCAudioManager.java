@@ -24,15 +24,21 @@ public class RNWebRTCAudioManager {
 
     public void start() {
         Log.d(TAG, "start() called; setting mode to MODE_IN_COMMUNICATION");
+        Log.d(TAG, "Current audio mode: " + audioManager.getMode() + ", Changing to MODE_IN_COMMUNICATION");
         audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
 
         // Request audio focus
         int result = audioManager.requestAudioFocus(
-                focusChange -> {},
+                focusChange -> {
+                    Log.d(TAG, "Audio focus changed: " + focusChange);
+                },
                 AudioManager.STREAM_VOICE_CALL,
                 AudioManager.AUDIOFOCUS_GAIN_TRANSIENT
         );
-        Log.d(TAG, "audioFocus request result: " + result);
+        Log.d(TAG, "audioFocus request result: " + result + " (1 = AUDIOFOCUS_REQUEST_GRANTED)");
+        Log.d(TAG, "Current audio state - Speaker: " + audioManager.isSpeakerphoneOn() 
+              + ", Bluetooth SCO: " + audioManager.isBluetoothScoOn()
+              + ", Wired Headset: " + hasWiredHeadset());
 
         // Initialize audio routing
         updateAudioRoute();
@@ -72,6 +78,21 @@ public class RNWebRTCAudioManager {
             Log.d(TAG, "No wired headset; setting speakerphoneOn=" + isSpeakerWanted);
             audioManager.setSpeakerphoneOn(isSpeakerWanted);
         }
+        
+        // Log final audio route state
+        String audioRoute = "unknown";
+        if (audioManager.isSpeakerphoneOn()) {
+            audioRoute = "SPEAKER";
+        } else if (hasWiredHeadset()) {
+            audioRoute = "WIRED_HEADSET";
+        } else {
+            audioRoute = "EARPIECE";
+        }
+        Log.d(TAG, "Final audio route: " + audioRoute 
+              + " (Speaker: " + audioManager.isSpeakerphoneOn()
+              + ", Mode: " + audioManager.getMode()
+              + ", Stream volume: " + audioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL)
+              + "/" + audioManager.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL) + ")");
     }
 
     private boolean hasWiredHeadset() {
