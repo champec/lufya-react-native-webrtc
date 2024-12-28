@@ -60,7 +60,7 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
 
     public WebRTCModule(ReactApplicationContext reactContext) {
         super(reactContext);
-
+        Log.d(TAG, "WebRTCModule constructor called");
         mPeerConnectionObservers = new SparseArray<>();
         localStreams = new HashMap<>();
 
@@ -100,6 +100,7 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
         //     adm = JavaAudioDeviceModule.builder(reactContext).setEnableVolumeLogger(false).createAudioDeviceModule();
         // }
                 if (adm == null) {
+                     Log.d(TAG, "Creating default JavaAudioDeviceModule with voice communication usage");
             AudioAttributes audioAttributes = new AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
@@ -123,6 +124,7 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
                            .setVideoDecoderFactory(decoderFactory)
                            .createPeerConnectionFactory();
 
+ Log.d(TAG, "PeerConnectionFactory successfully created");
         // PeerConnectionFactory now owns the adm native pointer, and we don't need it anymore.
         adm.release();
 
@@ -133,6 +135,7 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
 
         getUserMediaImpl = new GetUserMediaImpl(this, reactContext);
         audioManagerHelper = new RNWebRTCAudioManager(reactContext);
+        Log.d(TAG, "RNWebRTCAudioManager helper created");
     }
 
     @NonNull
