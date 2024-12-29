@@ -59,7 +59,7 @@ public class RNWebRTCAudioManager {
         Log.d(TAG, "Current audio mode: " + oldMode + " (0=MODE_NORMAL, 1=MODE_RINGTONE, 2=MODE_IN_CALL, 3=MODE_IN_COMMUNICATION)");
 
         // Force set the mode
-        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+        audioManager.setMode(AudioManager.USAGE_MEDIA);
 
         // Double check after setting
         int newMode = audioManager.getMode();

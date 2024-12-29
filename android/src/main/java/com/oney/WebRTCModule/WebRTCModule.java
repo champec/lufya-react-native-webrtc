@@ -99,7 +99,19 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
         // if (adm == null) {
         //     adm = JavaAudioDeviceModule.builder(reactContext).setEnableVolumeLogger(false).createAudioDeviceModule();
         // }
-               if (adm == null) {
+                if (adm == null) {
+                     Log.d(TAG, "Creating default JavaAudioDeviceModule with voice communication usage");
+            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                .build();
+
+            adm = JavaAudioDeviceModule.builder(reactContext)
+                .setEnableVolumeLogger(false)
+                .setAudioAttributes(audioAttributes)
+                .createAudioDeviceModule();
+        }
+         if (adm == null) {
                 Log.d(TAG, "Creating default JavaAudioDeviceModule with usage=media");
 
                 AudioAttributes audioAttributes = new AudioAttributes.Builder()
@@ -110,11 +122,10 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
                 // Remove the extra "AudioDeviceModule" here and just do:
                 adm = JavaAudioDeviceModule.builder(reactContext)
                     .setAudioAttributes(audioAttributes)
-                    .setUseHardwareEchoCanceler(false)
+                    .setUseHardwareAcousticEchoCanceler(false)
                     .setUseHardwareNoiseSuppressor(false)
                     .createAudioDeviceModule();
             }
-
 
         Log.d(TAG, "Using video encoder factory: " + encoderFactory.getClass().getCanonicalName());
         Log.d(TAG, "Using video decoder factory: " + decoderFactory.getClass().getCanonicalName());
