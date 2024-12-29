@@ -40,8 +40,6 @@ import java.util.concurrent.ExecutionException;
 import android.content.Context;
 import android.media.AudioAttributes;
 
-import com.oney.WebRTCModule.RNWebRTCAudioManager;
-
 @ReactModule(name = "WebRTCModule")
 public class WebRTCModule extends ReactContextBaseJavaModule {
     static final String TAG = WebRTCModule.class.getCanonicalName();
@@ -56,11 +54,10 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
     final Map<String, MediaStream> localStreams;
 
     private final GetUserMediaImpl getUserMediaImpl;
-    private RNWebRTCAudioManager audioManagerHelper;
 
     public WebRTCModule(ReactApplicationContext reactContext) {
         super(reactContext);
-        Log.d(TAG, "WebRTCModule constructor called");
+
         mPeerConnectionObservers = new SparseArray<>();
         localStreams = new HashMap<>();
 
@@ -100,23 +97,21 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
         //     adm = JavaAudioDeviceModule.builder(reactContext).setEnableVolumeLogger(false).createAudioDeviceModule();
         // }
                 if (adm == null) {
-                     Log.d(TAG, "Creating default JavaAudioDeviceModule with voice communication usage");
             AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                .setUsage(AudioAttributes.USAGE_MEDIA)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
                 .build();
 
             adm = JavaAudioDeviceModule.builder(reactContext)
                 .setEnableVolumeLogger(false)
                 .setAudioAttributes(audioAttributes)
+                .setUseHardwareAcousticEchoCanceler(false)
+                .setUseHardwareNoiseSuppressor(false)
                 .createAudioDeviceModule();
         }
 
         Log.d(TAG, "Using video encoder factory: " + encoderFactory.getClass().getCanonicalName());
         Log.d(TAG, "Using video decoder factory: " + decoderFactory.getClass().getCanonicalName());
-
-        // setSpeakerMute(false)
-        ((JavaAudioDeviceModule)adm).setSpeakerMute(false);
 
         mFactory = PeerConnectionFactory.builder()
                            .setAudioDeviceModule(adm)
@@ -124,7 +119,6 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
                            .setVideoDecoderFactory(decoderFactory)
                            .createPeerConnectionFactory();
 
- Log.d(TAG, "PeerConnectionFactory successfully created");
         // PeerConnectionFactory now owns the adm native pointer, and we don't need it anymore.
         adm.release();
 
@@ -134,8 +128,6 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
         mAudioDeviceModule = adm;
 
         getUserMediaImpl = new GetUserMediaImpl(this, reactContext);
-        audioManagerHelper = new RNWebRTCAudioManager(reactContext);
-        Log.d(TAG, "RNWebRTCAudioManager helper created");
     }
 
     @NonNull
@@ -1437,24 +1429,6 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
 
             pco.dataChannelSend(reactTag, data, type);
         });
-    }
-
-    @ReactMethod
-    public void startAudioManager() {
-        Log.d(TAG, "Starting RNWebRTCAudioManager");
-        audioManagerHelper.start();
-    }
-
-    @ReactMethod
-    public void stopAudioManager() {
-        Log.d(TAG, "Stopping RNWebRTCAudioManager");
-        audioManagerHelper.stop();
-    }
-
-    @ReactMethod
-    public void setSpeakerWanted(boolean enable) {
-        Log.d(TAG, "Setting speaker wanted: " + enable);
-        audioManagerHelper.setSpeakerWanted(enable);
     }
 
     @ReactMethod
