@@ -122,8 +122,8 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
                 // Remove the extra "AudioDeviceModule" here and just do:
                 adm = JavaAudioDeviceModule.builder(reactContext)
                     .setAudioAttributes(audioAttributes)
-                    .setUseHardwareAcousticEchoCanceler(false)
-                    .setUseHardwareNoiseSuppressor(false)
+                    // .setUseHardwareAcousticEchoCanceler(false)
+                    // .setUseHardwareNoiseSuppressor(false)
                     .createAudioDeviceModule();
             }
 
